@@ -68,9 +68,15 @@ public class MainActivity extends Activity implements OnClickListener
 	{
 		TextView txtNum = (TextView)findViewById(R.id.main_txtNum);
 		String num = txtNum.getText().toString();
-		if (num.matches("[^a-z]"))
+		if (num.matches("[^0-9]"))
 		{
 			Toast.makeText(this, "Error: Phone number can only contain digits", Toast.LENGTH_SHORT)
+					.show();
+			return;
+		}
+		if (num.length() == 0)
+		{
+			Toast.makeText(this, "Error: Phone number must be at least 1 digit", Toast.LENGTH_SHORT)
 					.show();
 			return;
 		}
@@ -95,6 +101,8 @@ public class MainActivity extends Activity implements OnClickListener
 		PhoneToWords ptw = new PhoneToWords(ptwDB, 1);
 		
 		List<String> words = ptw.getWords(num);
+		
+		Toast.makeText(this, "Found " + words.size() + " matches", Toast.LENGTH_SHORT).show();
 		
 		ArrayAdapter<String> numAdapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1, words);

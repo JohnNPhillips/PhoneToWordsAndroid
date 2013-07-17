@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="app_name">Phone To Words</string>
+	<string name="app_label">PhoneWords</string>
+    <string name="app_title">Phone To Words</string>
     <string name="hello_world">Hello world!</string>
     <!--  -->
     <string name="app_about">Phone To Words\n
