@@ -1,0 +1,3 @@
+[submodule "PhoneWords/PhoneToWordsJava"]
+	path = PhoneWords/PhoneToWordsJava
+	url = https://github.com/AyrosProjects/PhoneToWordsJava.git
