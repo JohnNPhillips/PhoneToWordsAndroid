@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Phone To Words</string>
+    <string name="hello_world">Hello world!</string>
+    <!--  -->
+    <string name="app_about">Phone To Words\n
+        \u00a9 2013 Ayros Projects/John Phillips\n
+        \n
+        This app is open source and is released under the Simplified BSD license. The source code can be found here:\n
+        https://github.com/AyrosProjects/PhoneWordsAndroid</string>
+    <string name="mainMenu_about">About</string>
+    <!--  -->
+    <string name="main_btnSearch">Lookup</string>
+    <string name="main_txtNum_hint">Enter phone number</string>
+
+</resources>
