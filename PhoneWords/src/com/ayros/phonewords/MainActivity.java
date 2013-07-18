@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
+import java.util.Scanner;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -114,7 +113,12 @@ public class MainActivity extends Activity
 		{
 			InputStream is = getAssets().open("dictionary.txt");
 			
-			String dict = IOUtils.toString(is);
+			Scanner s = new Scanner(is).useDelimiter("\\A");
+		    if (!s.hasNext())
+		    {
+		    	throw new IOException();
+		    }
+		    String dict = s.next();
 			
 			PhoneToWordsDB ptwDB = PhoneToWordsDB.fromProcessedWordList(dict, 50000);
 			ptw = new PhoneToWords(ptwDB, 0);
