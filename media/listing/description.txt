@@ -1,0 +1,18 @@
+Ever wondered what your phone number spells? Phone To Words quickly and easily converts phone numbers to easily remembered words and phrases.
+
+Also, the best part of Phone To Words is that it does all of the lookups right on your phone with no required internet access! There are websites that do the same thing as this app, but they do all of the lookups on their servers which could easily be storing your phone numbers without your knowledge. Phone To Words is the only truly secure option as your phone number is never transmitted, and never stored (not even on your own device).
+
+For the numbers, Phone To Words uses the traditional layout:
+1: Nothing
+2: ABC
+3: DEF
+4: GHI
+5: JKL
+6: MNO
+7: PQRS
+8: TUV
+9: WXYZ
+0: Nothing
+
+Also, this app is open-source, and I encourage suggestions and source code patches. The source code and be found here:
+https://github.com/AyrosProjects/PhoneWordsAndroid
