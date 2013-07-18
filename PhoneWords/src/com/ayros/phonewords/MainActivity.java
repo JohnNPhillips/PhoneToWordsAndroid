@@ -63,7 +63,7 @@ public class MainActivity extends Activity
 		}
 	}
 	
-	private static final int MAX_NUMBER_LENGTH = 12;
+	private static final int MAX_NUMBER_LENGTH = 14;
 	
 	PhoneToWords ptw = null;
 	
@@ -123,7 +123,7 @@ public class MainActivity extends Activity
 			PhoneToWordsDB ptwDB = PhoneToWordsDB.fromProcessedWordList(dict, 50000);
 			ptw = new PhoneToWords(ptwDB, 0);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			ptw = null;
 		}
