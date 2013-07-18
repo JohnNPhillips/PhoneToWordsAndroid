@@ -2,20 +2,22 @@ package com.ayros.phonewords;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,11 +25,48 @@ import android.widget.Toast;
 import com.ayros.phonetowordsjava.PhoneToWords;
 import com.ayros.phonetowordsjava.PhoneToWordsDB;
 
-public class MainActivity extends Activity implements OnClickListener
+public class MainActivity extends Activity
 {
-	private static final int MAX_DIGITS = 12;
+	private class DatabaseLoader extends AsyncTask<Void, Void, Void>
+	{
+		private ProgressDialog pd;
+		
+		@Override
+		protected void onPreExecute()
+		{
+			pd = new ProgressDialog(MainActivity.this);
+			pd.setTitle("Building Database");
+			pd.setMessage("Building database, this could take a few seconds...");
+			pd.setCancelable(false);
+			pd.setIndeterminate(true);
+			
+			pd.show();
+		}
+		
+		@Override
+		protected Void doInBackground(Void... arg0)
+		{
+			loadDB();
+			if (ptw == null)
+			{
+				showToast("Error: Could not build database");
+				
+				MainActivity.this.finish();
+			}
+			
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result)
+		{
+			pd.dismiss();
+		}
+	}
 	
-	PhoneToWordsDB ptwDB = null;
+	private static final int MAX_NUMBER_LENGTH = 12;
+	
+	PhoneToWords ptw = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -35,8 +74,30 @@ public class MainActivity extends Activity implements OnClickListener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		Button btnSearch = (Button)findViewById(R.id.main_btnSearch);
-		btnSearch.setOnClickListener(this);
+		AsyncTask<Void, Void, Void> databaseLoader = new DatabaseLoader();
+		databaseLoader.execute((Void[])null);
+		
+		TextView txtNum = (TextView)findViewById(R.id.main_txtNum);
+		txtNum.addTextChangedListener(new TextWatcher()
+		{
+			@Override
+			public void afterTextChanged(Editable arg0)
+			{
+				MainActivity.this.updateNumbers();
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+			{
+				// Not needed
+			}
+			
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+			{
+				// Not needed
+			}
+		});
 	}
 	
 	@Override
@@ -55,60 +116,73 @@ public class MainActivity extends Activity implements OnClickListener
 			
 			String dict = IOUtils.toString(is);
 			
-			ptwDB = PhoneToWordsDB.fromProcessedWordList(dict, 50000);
+			PhoneToWordsDB ptwDB = PhoneToWordsDB.fromProcessedWordList(dict, 50000);
+			ptw = new PhoneToWords(ptwDB, 0);
 		}
 		catch (IOException e)
 		{
-			ptwDB = null;
+			ptw = null;
 		}
 	}
 	
-	@Override
-	public void onClick(View v)
+	public void updateNumbers()
 	{
 		TextView txtNum = (TextView)findViewById(R.id.main_txtNum);
 		String num = txtNum.getText().toString();
-		if (num.matches("[^0-9]"))
+		if (num.matches(".*[^0-9].*"))
 		{
-			Toast.makeText(this, "Error: Phone number can only contain digits", Toast.LENGTH_SHORT)
-					.show();
+			setList("Error: Only digits allowed");
 			return;
 		}
 		if (num.length() == 0)
 		{
-			Toast.makeText(this, "Error: Phone number must be at least 1 digit", Toast.LENGTH_SHORT)
-					.show();
+			setList("");
 			return;
 		}
-		if (num.length() > MAX_DIGITS)
+		if (num.length() > MAX_NUMBER_LENGTH)
 		{
-			Toast.makeText(this, "Error: Phone number can only be at most " + MAX_DIGITS
-					+ " digits", Toast.LENGTH_SHORT);
+			setList("Error: Number too long");
 			return;
 		}
 		
-		if (ptwDB == null)
-		{
-			loadDB();
-			if (ptwDB == null)
-			{
-				Toast.makeText(this, "Unknown error when trying to lookup phone number",
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
-		}
+		List<String> words = getWords(num, 0);
 		
-		PhoneToWords ptw = new PhoneToWords(ptwDB, 1);
+		setList(words);
+	}
+	
+	private void setList(String row)
+	{
+		List<String> rows = new ArrayList<String>();
+		rows.add(row);
 		
-		List<String> words = ptw.getWords(num);
-		
-		Toast.makeText(this, "Found " + words.size() + " matches", Toast.LENGTH_SHORT).show();
-		
-		ArrayAdapter<String> numAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, words);
+		setList(rows);
+	}
+	
+	private void setList(List<String> rows)
+	{
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, rows);
 		
 		ListView lstNums = (ListView)findViewById(R.id.main_lstNumbers);
-		lstNums.setAdapter(numAdapter);
+		lstNums.setAdapter(adapter);
+	}
+	
+	private List<String> getWords(String phoneNum, int maxDigits)
+	{
+		if (maxDigits > phoneNum.length())
+		{
+			return new ArrayList<String>();
+		}
+		
+		ptw.setMaxDigits(maxDigits);
+		List<String> words = ptw.getWords(phoneNum);
+		
+		return words.size() > 0 ? words : getWords(phoneNum, maxDigits + 1);
+	}
+	
+	public void showToast(String msg)
+	{
+		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 	}
 	
 	@Override
